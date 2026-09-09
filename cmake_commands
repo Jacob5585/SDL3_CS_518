@@ -1,0 +1,3 @@
+cmake -S .\_ -B .\_\build -G "MinGW Makefiles" -DCMAKE_CXX_COMPILER=g++
+cmake --build .\_\build
+.\_\build\_.exe

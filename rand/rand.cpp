@@ -1,24 +1,7 @@
-#include <cstdlib>
-#include <ctime>
-
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-#include "utils/utils.h"
-
-// Uint32 rand32() {
-//     Uint32 result = rand();
-
-//     result ^= rand() << 15;
-//     result ^= rand() << 30;
-
-//     return result;
-// }
-
 int main(int argc, char *argv[]) {
-    Uint32 seed;
-    seed = time(nullptr) ^ (intptr_t)&seed ^ (intptr_t)&seed >> 16; // Cast memory address of seed to int then xor it will time to make the seed better
-    srand(seed);
     
     if (SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Window *win = SDL_CreateWindow(argv[0], 600, 400, 0);
@@ -26,19 +9,12 @@ int main(int argc, char *argv[]) {
         if (win != nullptr) {
             SDL_Surface *s = SDL_GetWindowSurface(win);
             // Do stuff with the surface
-            // *(Uint32 *)(s->pixels) = 213456;
-
-            // Uint32 *p = (Uint32 *)(s->pixels);
-            // for (auto y = 0; y < 400; y++) {
-            //     for (auto x = 0; x < 600; x++) {
-            //         p[y * 600 + x] = 213456;
-            //     }
-            // }
+            
 
             Uint32 *p = (Uint32 *)(s->pixels);
             int size = 600 * 400;
             for (auto i = 0; i < size; i++) {
-                p[i] = rand32();
+                p[i] = SDL_rand_bits();
             }
 
             SDL_UpdateWindowSurface(win);
@@ -46,7 +22,7 @@ int main(int argc, char *argv[]) {
             SDL_Event e;
             
             while (SDL_PollEvent(&e) == false || e.type != SDL_EVENT_QUIT) {
-                
+                // do nothing but stay open
             }
         }
         else {
@@ -60,5 +36,5 @@ int main(int argc, char *argv[]) {
 
     SDL_Quit();
 
-    return EXIT_SUCCESS;
+    return 0;
 }
