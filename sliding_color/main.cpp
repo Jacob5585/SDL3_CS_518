@@ -1,7 +1,7 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 
-int update_color(Uint8 color) {
+Uint8 update_color(Uint8 color) {
     if (color == 0) {
         color++;
     }
@@ -23,7 +23,7 @@ int update_color(Uint8 color) {
 }
 
 int main(int argc, char *argv[]) {
-    Uint32 delay = 30;
+    Uint32 delay = 5;
     if (argc > 1) {
         delay = SDL_strtoul(argv[1], NULL, 10);
     }
