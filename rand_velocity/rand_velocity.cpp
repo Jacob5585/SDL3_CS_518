@@ -1,9 +1,9 @@
 #include <SDL3/SDL.h>
-// #include <SDL3/SDL_main.h>
 
 const int width = 600;
 const int height = 400;
 const int size = width * height;
+const float alpha = 0.90;
 
 int main(int argc, char *argv[]) {
     if(SDL_Init(SDL_INIT_VIDEO)) {
@@ -19,6 +19,8 @@ int main(int argc, char *argv[]) {
             Uint32 *p = (Uint32 *)(s->pixels);
             for(auto i = 0; i < size; i++) {
                 // p[i] = SDL_rand_bits();
+
+                // grayscale
                 Uint8 c = SDL_rand(256);
                 p[i] = SDL_MapSurfaceRGB(s, c, c, c);
             }
@@ -53,14 +55,25 @@ int main(int argc, char *argv[]) {
                  * color bands don't eventually reach a singularity :-)
                  */
                 for(auto i = 1; i < size - 1; i++) {
-                    if(SDL_rand(1000) > 0) {
-                        /* randomly choose the pixel to the left or right */
-                        Uint32 c = p[i + SDL_rand(2) * 2 - 1];
-                        p[i] = c;
-                    }
-                    else {
-                        p[i] = SDL_rand_bits();
-                    }
+                    Uint8 c1;
+                    SDL_GetRGB(p[i], SDL_GetPixelFormatDetails(s->format), nullptr, &c1, nullptr, nullptr);
+                    Uint8 c2 = SDL_rand(256);
+                    c1 = alpha * c1 + (1.0 - alpha) * c2;
+                    p[i] = SDL_MapSurfaceRGB(s, c1, c1, c1);
+
+                    // if(SDL_rand(1000) > 0) {
+                    //     /* randomly choose the pixel to the left or right */
+                    //     // color
+                    //     // Uint32 c = p[i + SDL_rand(2) * 2 - 1];
+                    //     // p[i] = c;
+
+                    //     // grayscale
+                    //     Uint8 c = SDL_rand(256);
+                    //     p[i] = SDL_MapSurfaceRGB(s, c, c, c);
+                    // }
+                    // else {
+                    //     p[i] = SDL_rand_bits();
+                    // }
                 }
 
                 SDL_UpdateWindowSurface(win);
