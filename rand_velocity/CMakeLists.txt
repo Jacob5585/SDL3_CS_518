@@ -3,8 +3,8 @@ project(rand_project CXX)
 
 find_package(SDL3 CONFIG REQUIRED)
 
-add_executable(rand rand.cpp)
+add_executable(rand_velocity rand_velocity.cpp)
 
-target_compile_options(rand PRIVATE -Wall -Wpedantic)
+target_compile_options(rand_velocity PRIVATE -Wall -Wpedantic)
 
-target_link_libraries(rand PRIVATE SDL3::SDL3)
+target_link_libraries(rand_velocity PRIVATE SDL3::SDL3)
