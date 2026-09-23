@@ -3,54 +3,64 @@
 #include <string>
 #include <vector>
 #include <utility>
-// #include <iostream>
+
+void shuffle_order(std::vector<std::pair<int, int>> &pixelOrder, SDL_Surface *img) {
+    // Collect of pixels coordinate pairs
+    for (int y = 0; y < img->h; y++) {
+        for (int x = 0; x < img->w; x++) {
+            pixelOrder.push_back({x, y});
+        }
+    }
+
+    // Fisher Yates Shuffle
+    for (int i = pixelOrder.size() - 1; i > 0; i--) {
+        int j = SDL_rand(i + 1);
+        std::swap(pixelOrder[i], pixelOrder[j]);
+    }
+}
+
+void get_pixel_neighbors(std::vector<std::pair<int, int>> &neighbors, SDL_Surface *img, int x, int y) {
+    // Do not index out of bounds on the edges
+    if (x - 1 > -1 && y - 1 > -1         )   { neighbors.push_back({x - 1, y - 1}); }   //top left
+    if (y - 1 > -1                       )   { neighbors.push_back({x, y - 1});     }   //top
+    if (x + 1 < img->w && y - 1 > -1     )   { neighbors.push_back({x + 1, y - 1}); }   //top right
+    if (x - 1 > -1                       )   { neighbors.push_back({x - 1, y});     }   //left
+    if (x + 1 < img->w                   )   { neighbors.push_back({x + 1, y});     }   //rigth
+    if (x - 1 > -1 && y + 1 < img->h     )   { neighbors.push_back({x - 1, y + 1}); }   //bottom left
+    if (y + 1 < img->h                   )   { neighbors.push_back({x, y + 1});     }   //bottom
+    if (x + 1 < img->w && y + 1 < img->h )   { neighbors.push_back({x + 1, y + 1}); }   //bottom right
+}
+
+void randomly_swap_pixels(std::vector<std::pair<int, int>> &neighbors, Uint32* pixels, int pitch, int x, int y) {
+    // select a adjacent pixel at random
+    int index = SDL_rand(static_cast<int>(neighbors.size()));
+    auto [p2_x, p2_y] = neighbors[index];
+                                    
+    // swap Uint32 pixel values of P1 and P2 (DO NOT SWAP PIXELS ON THE WINDOW SURFACE DIRECTLY)
+    std::swap(
+        pixels[y * pitch + x], // y * ptich give row + x give location in row
+        pixels[p2_y * pitch + p2_x] // y * ptich give row + x give location in row
+    );
+}
 
 void thanos_snap(SDL_Surface *img, SDL_Window *win, SDL_Surface *s){
     // shuffle pixel order
     std::vector<std::pair<int, int>> pixelOrder;
-    for (int y = 0; y < img->h; y++) {
-        for (int x = 0; x < img->w; x++) {
-            pixelOrder.push_back({x, y});
-            }
-        }
+    shuffle_order(pixelOrder, img);
 
-        // Fisher Yates Shuffle
-        for (int i = pixelOrder.size() - 1; i > 0; i--) {
-            int j = SDL_rand(i + 1);
-            std::swap(pixelOrder[i], pixelOrder[j]);
-        }
-                                
-        Uint32* pixels = (Uint32*)img->pixels;
-        int pitch = img->pitch / sizeof(Uint32); // img->pitch is needed for memory offset, int pitch is the number of pixels per row
+    Uint32* pixels = (Uint32*)img->pixels;
+    int pitch = img->pitch / sizeof(Uint32); // img->pitch is needed for memory offset, int pitch is the number of pixels per row
 
-        // vist each pixel in the shuffled order
-        for (const auto& [x, y] : pixelOrder) {
-            
-            // Do not index out of bounds on the edges
-            std::vector<std::pair<int, int>> neighbors;
-            if (x - 1 > -1 && y - 1 > -1         )   { neighbors.push_back({x - 1, y - 1}); }   //top left
-            if (y - 1 > -1                       )   { neighbors.push_back({x, y - 1});     }   //top
-            if (x + 1 < img->w && y - 1 > -1     )   { neighbors.push_back({x + 1, y - 1}); }   //top right
-            if (x - 1 > -1                       )   { neighbors.push_back({x - 1, y});     }   //left
-            if (x + 1 < img->w                   )   { neighbors.push_back({x + 1, y});     }   //rigth
-            if (x - 1 > -1 && y + 1 < img->h     )   { neighbors.push_back({x - 1, y + 1}); }   //bottom left
-            if (y + 1 < img->h                   )   { neighbors.push_back({x, y + 1});     }   //bottom
-            if (x + 1 < img->w && y + 1 < img->h )   { neighbors.push_back({x + 1, y + 1}); }   //bottom right
+    // vist each pixel in the shuffled order
+    for (const auto& [x, y] : pixelOrder) {
+        std::vector<std::pair<int, int>> neighbors;
+        get_pixel_neighbors(neighbors, img, x, y);
+        randomly_swap_pixels(neighbors, pixels, pitch, x, y);
+    }
 
-            // select a adjacent pixel at random
-            int index = SDL_rand(static_cast<int>(neighbors.size()));
-            auto [p2_x, p2_y] = neighbors[index];
-                                    
-            // swap Uint32 pixel values of P1 and P2 (DO NOT SWAP PIXELS ON THE WINDOW SURFACE DIRECTLY)
-            std::swap(
-                pixels[y * pitch + x], // y * ptich give row + x give location in row
-                pixels[p2_y * pitch + p2_x] // y * ptich give row + x give location in row
-            );
-        }
-
-        // Update Image
-        SDL_BlitSurface(img, nullptr, s, nullptr);
-        SDL_UpdateWindowSurface(win);
+    // Update Image
+    SDL_BlitSurface(img, nullptr, s, nullptr);
+    SDL_UpdateWindowSurface(win);
 }
 
 int main(int argc, char *argv[]) {
@@ -83,6 +93,7 @@ int main(int argc, char *argv[]) {
         if(win != nullptr) {
 
             SDL_Surface *s = SDL_GetWindowSurface(win);
+            // img = SDL_ConvertSurface(img, s->format);
 
             SDL_BlitSurface(img, nullptr, s, nullptr);
             SDL_UpdateWindowSurface(win);
@@ -109,7 +120,8 @@ int main(int argc, char *argv[]) {
                             if(k.key == SDLK_S) {
                                 std::string file = "image" + std::to_string(imageIndex) + ".png";
                                 // IMG_SavePNG(s, file);
-                                bool status = SDL_SavePNG(s, file.c_str());
+                                // bool status = SDL_SavePNG(s, file.c_str());
+                                bool status = IMG_SavePNG(s, file.c_str());
                                 if (!status) { SDL_Log("Error saving file: \"%s\"", SDL_GetError()); }
                                 imageIndex++;
                             }
@@ -119,18 +131,14 @@ int main(int argc, char *argv[]) {
                         break;
                     }
                 }
-
                 SDL_UpdateWindowSurface(win);
             }
-
             SDL_DestroySurface(img);
             SDL_DestroyWindow(win);
-
         }
         else {
             SDL_Log("%s", SDL_GetError());
         }
-
         SDL_Quit();
     }
     else {
