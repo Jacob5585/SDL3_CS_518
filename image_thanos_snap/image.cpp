@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        SDL_Window *win = SDL_CreateWindow(argv[0], img->w, img->h, 0);
+        SDL_Window *win = SDL_CreateWindow("Prog 2: cormiej", img->w, img->h, 0);
 
         if(win != nullptr) {
 
