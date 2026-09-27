@@ -31,15 +31,15 @@ void get_pixel_neighbors(std::vector<std::pair<int, int>> &neighbors, SDL_Surfac
     if (x + 1 < img->w && y + 1 < img->h )   { neighbors.push_back({x + 1, y + 1}); }   //bottom right
 }
 
-void randomly_swap_pixels(std::vector<std::pair<int, int>> &neighbors, Uint32* pixels, int pitch, int x, int y) {
+void randomly_swap_pixels(std::vector<std::pair<int, int>> &neighbors, Uint32* pixels, int pixels_per_row, int x, int y) {
     // select a adjacent pixel at random
     int index = SDL_rand(static_cast<int>(neighbors.size()));
     auto [p2_x, p2_y] = neighbors[index];
                                     
-    // swap Uint32 pixel values of P1 and P2 (DO NOT SWAP PIXELS ON THE WINDOW SURFACE DIRECTLY)
+    // swap pixel values of P1 and P2
     std::swap(
-        pixels[y * pitch + x], // y * ptich give row + x give location in row
-        pixels[p2_y * pitch + p2_x] // y * ptich give row + x give location in row
+        pixels[y * pixels_per_row + x], // y * pixels_per_row give row + x give location in row
+        pixels[p2_y * pixels_per_row + p2_x] // y * pixels_per_row give row + x give location in row
     );
 }
 
@@ -49,13 +49,13 @@ void thanos_snap(SDL_Surface *img, SDL_Window *win, SDL_Surface *s){
     shuffle_order(pixelOrder, img);
 
     Uint32* pixels = (Uint32*)img->pixels;
-    int pitch = img->pitch / sizeof(Uint32); // img->pitch is needed for memory offset, int pitch is the number of pixels per row
+    int pixels_per_row = img->pitch / sizeof(Uint32); // img->pitch is needed for memory offset
 
     // vist each pixel in the shuffled order
     for (const auto& [x, y] : pixelOrder) {
         std::vector<std::pair<int, int>> neighbors;
         get_pixel_neighbors(neighbors, img, x, y);
-        randomly_swap_pixels(neighbors, pixels, pitch, x, y);
+        randomly_swap_pixels(neighbors, pixels, pixels_per_row, x, y);
     }
 
     // Update Image
@@ -93,7 +93,6 @@ int main(int argc, char *argv[]) {
         if(win != nullptr) {
 
             SDL_Surface *s = SDL_GetWindowSurface(win);
-            // img = SDL_ConvertSurface(img, s->format);
 
             SDL_BlitSurface(img, nullptr, s, nullptr);
             SDL_UpdateWindowSurface(win);
@@ -119,8 +118,6 @@ int main(int argc, char *argv[]) {
 
                             if(k.key == SDLK_S) {
                                 std::string file = "image" + std::to_string(imageIndex) + ".png";
-                                // IMG_SavePNG(s, file);
-                                // bool status = SDL_SavePNG(s, file.c_str());
                                 bool status = IMG_SavePNG(s, file.c_str());
                                 if (!status) { SDL_Log("Error saving file: \"%s\"", SDL_GetError()); }
                                 imageIndex++;
