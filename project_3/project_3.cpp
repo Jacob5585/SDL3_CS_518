@@ -19,16 +19,9 @@ struct FireCrackerPartical {
     bool active{false};
 };
 
-template <typename Buffer2D, typename neighbors1D>
-void get_pixel_neighbors(neighbors1D &neighbors, const Buffer2D &buffer, int x, int y, int distance) {
-    // int y_offset[] = {-1, -1, -1,  0, 0,  0, 1, 1, 1};
-    // int x_offset[] = {-1,  0,  1, -1, 0, 1, -1, 0, 1};
+void get_pixel_neighbors(std::vector<std::pair<int, int>> &neighbors, const std::vector<std::vector<SDL_Color>> &buffer, int x, int y, int distance) {
     int row_length = buffer[0].size();
     int col_length = buffer.size();
-
-    // for (int i = 0; i < 9; i++) {
-    //     int x_pos = x + x_offset[i];
-    //     int y_pos = y + y_offset[i];
 
     for (int dy = -distance; dy <= distance; dy++) {
         for (int dx = -distance; dx <= distance; dx++) {
@@ -37,7 +30,6 @@ void get_pixel_neighbors(neighbors1D &neighbors, const Buffer2D &buffer, int x, 
 
             if (dx * dx + dy * dy <= distance * distance) {
                 if (x_pos >= 0 && x_pos < row_length && y_pos >= 0 && y_pos < col_length) {
-                    // neighbors.push_back(buffer[y_pos][x_pos]);
                     neighbors.push_back({y_pos, x_pos});
                 }
             }
@@ -46,7 +38,6 @@ void get_pixel_neighbors(neighbors1D &neighbors, const Buffer2D &buffer, int x, 
 }
 
 void ripple(SDL_Surface *img, SDL_Window *win, SDL_Surface *surface, std::vector<std::vector<SDL_Color>> &buffer, int x, int y, unsigned distance) {
-    
     float h, s, v;
 
     std::vector<std::pair<int, int>> neighbors;
@@ -69,10 +60,7 @@ void ripple(SDL_Surface *img, SDL_Window *win, SDL_Surface *surface, std::vector
     SDL_UpdateWindowSurface(win);
 }
 
-// add in seed
 void glitch(SDL_Surface *img, SDL_Window *win, SDL_Surface *surface, Uint32 *pixels, std::vector<std::vector<SDL_Color>> &buffer) {
-    // randonly swap pixels on the screen
-    
     int pixels_per_row = img->pitch / sizeof(Uint32);
     unsigned glitched_pixels = (img->h * img->w) * .05;
     
@@ -146,7 +134,6 @@ void firecracker_update(SDL_Surface *img, std::vector<FireCrackerPartical> &fire
         if ((particle.prev_x >= 0 && particle.prev_x < img->w) && (particle.prev_y >= 0 && particle.prev_y < img->h)) {
             SDL_Color origal_color = pixelsColorGrid[particle.prev_y][particle.prev_x];
             SDL_WriteSurfacePixel(img, particle.prev_x, particle.prev_y, origal_color.r, origal_color.g, origal_color.b, origal_color.a);
-
             particle.prev_x = -1;
             particle.prev_y = -1;
         }
@@ -155,7 +142,7 @@ void firecracker_update(SDL_Surface *img, std::vector<FireCrackerPartical> &fire
         if (!particle.first_frame) {
             particle.pos_x += particle.vel_x * delta_time;
             particle.pos_y += particle.vel_y * delta_time;
-            particle.vel_y += 15.0f * delta_time; // Gravity acceleration in px/s^2
+            particle.vel_y += 15.0f * delta_time;
             particle.time -= delta_time;
         } else {
             particle.first_frame = false;
@@ -167,7 +154,7 @@ void firecracker_update(SDL_Surface *img, std::vector<FireCrackerPartical> &fire
         // Check bounds and lifetime
         if (particle.time <= 0.0f || new_pos_x < 0 || new_pos_x >= img->w || new_pos_y < 0 || new_pos_y >= img->h) {            
             particle.active = false;
-            continue; // Since we already restored prev_x/prev_y above, it's fully cleaned up!
+            continue;
         }
 
         particle.prev_x = new_pos_x;
@@ -223,7 +210,6 @@ int main(int argc, char *argv[]) {
             Uint32 last_firecracker_spawn = SDL_GetTicks();
             Uint32 last_frame_time = SDL_GetTicks();
 
-            // Uint32 orginal_pixels = (Uint32)img->pixels;
             Uint32* pixels = (Uint32*)img->pixels;
 
             std::vector<std::vector<std::pair<int, int>>> pixelsCoordinateGrid(img->h, std::vector<std::pair<int, int>>(img->w));
@@ -279,12 +265,6 @@ int main(int argc, char *argv[]) {
                             }
                         }
 
-                    // case SDL_EVENT_MOUSE_BUTTON_UP:
-                    //     {
-                    //         if (e.button.button == SDL_BUTTON_LEFT) {
-                    //         }
-                    //     }
-                    
                     default:
                         break;
                     }
@@ -315,8 +295,8 @@ int main(int argc, char *argv[]) {
                 }
 
                 firecracker_update(img, firecracker_particles, pixelsColorGrid, delta_time);
-
                 // 
+
                 SDL_BlitSurface(img, nullptr, surface, nullptr);
                 SDL_UpdateWindowSurface(win);
             }
@@ -335,3 +315,10 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+
+/*
+    Right mouse click to restore the image back to the orignal
+    Left mouse click to create a hue shifting ripple that grows the longer the mouse is held down
+    G randomly swaps pixels
+    Firecracker effect randonly appears on screen every few seconds
+*/
