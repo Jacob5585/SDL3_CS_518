@@ -1,3 +1,14 @@
+/*
+    Jacob Cormier MultiMedia Programming project 3
+    This program loads an image tacken as a command line argument, automaticallty spawns a firecracker effect every few seconds,
+    allows for randonly swapping pixels, shifting the hue in a ripple effect, and restoring the image back to the oringal
+
+    Right mouse click to restore the image back to the orignal
+    Left mouse click to create a hue shifting ripple that grows the longer the mouse is held down, hue change uses ineratia
+    G randomly swaps pixels
+    Firecracker effect randonly appears on screen every few seconds
+*/
+
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 #include <string>
@@ -316,9 +327,3 @@ int main(int argc, char *argv[]) {
     return 0;
 }
 
-/*
-    Right mouse click to restore the image back to the orignal
-    Left mouse click to create a hue shifting ripple that grows the longer the mouse is held down, hue change uses ineratia
-    G randomly swaps pixels
-    Firecracker effect randonly appears on screen every few seconds
-*/
