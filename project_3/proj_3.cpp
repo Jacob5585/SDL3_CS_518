@@ -64,7 +64,7 @@ void glitch(SDL_Surface *img, SDL_Window *win, SDL_Surface *surface, Uint32 *pix
     int pixels_per_row = img->pitch / sizeof(Uint32);
     unsigned glitched_pixels = (img->h * img->w) * .05;
     
-    for (int i = 0; i < glitched_pixels; i++) {
+    for (unsigned i = 0; i < glitched_pixels; i++) {
         unsigned x1 = SDL_rand(img->w);
         unsigned y1 = SDL_rand(img->h);
         unsigned x2 = SDL_rand(img->w);
@@ -318,7 +318,7 @@ int main(int argc, char *argv[]) {
 
 /*
     Right mouse click to restore the image back to the orignal
-    Left mouse click to create a hue shifting ripple that grows the longer the mouse is held down
+    Left mouse click to create a hue shifting ripple that grows the longer the mouse is held down, hue change uses ineratia
     G randomly swaps pixels
     Firecracker effect randonly appears on screen every few seconds
 */
