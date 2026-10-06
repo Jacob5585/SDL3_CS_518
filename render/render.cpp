@@ -1,7 +1,6 @@
 #include <SDL3/SDL.h>
 #include <SDL3_image/SDL_image.h>
 
-#include "color.h"
 #include "framerate.h"
 
 int main(int argc, char *argv[]) {
@@ -20,28 +19,20 @@ int main(int argc, char *argv[]) {
             return 1;
         }
 
-        // SDL_Window *win = SDL_CreateWindow(argv[0], orig_img->w, orig_img->h, 0);
-        
         SDL_Window *win = nullptr;
         SDL_Renderer *rend = nullptr;
 
+
         if(SDL_CreateWindowAndRenderer(argv[0], orig_img->w, orig_img->h, 0, &win, &rend)) {
 
-            // SDL_Surface *surf = SDL_GetWindowSurface(win);
-            // SDL_Surface *img = SDL_ConvertSurface(orig_img, surf->format);
             SDL_Texture *img = SDL_CreateTextureFromSurface(rend, orig_img);
             SDL_DestroySurface(orig_img);
 
-            // Uint32 *p = (Uint32 *)(img->pixels);
-            // int pixel_per_row = img->pitch / sizeof(Uint32);
-            const SDL_PixelFormatDetails *pdf = SDL_GetPixelFormatDetails(img->format);
-
-            // SDL_BlitSurface(img, nullptr, surf, nullptr);
             SDL_RenderTexture(rend, img, nullptr, nullptr);
-            SDL_UpdateWindowSurface(win);
+            SDL_RenderPresent(rend);
             SDL_Event e;
 
-            FrameRate fr;
+            FrameRate fr(40);
 
             int cnt = 0;
             bool quit = false;
@@ -65,16 +56,16 @@ int main(int argc, char *argv[]) {
                     }
                 }
 
-                float mx, my;
+                float mx = 1.0, my = 1.0;
                 SDL_GetMouseState(&mx, &my);
 
 
-                // SDL_BlitSurface(img, nullptr, surf, nullptr);
-                SDL_UpdateWindowSurface(win);
+//                SDL_RenderPresent(rend);
+
                 fr.delay();
             }
 
-            SDL_DestroySurface(img);
+            SDL_DestroyTexture(img);
             SDL_DestroyRenderer(rend);
             SDL_DestroyWindow(win);
 

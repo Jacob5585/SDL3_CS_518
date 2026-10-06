@@ -6,14 +6,16 @@
 class FrameRate {
     public:
         FrameRate(unsigned fps = 30);
-        unsigned get_fps();
         void set_fps(unsigned fps);
+        unsigned get_fps();
         void delay();
 
     private:
         unsigned fps_;
         Uint64 start_;
-        Uint64 frame_nano_seconds_;
+        Uint64 frame_ns_;
 };
+
+
 
 #endif /* __FRAMERATE_H__ */
