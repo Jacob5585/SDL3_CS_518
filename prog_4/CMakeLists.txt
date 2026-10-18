@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(prog_4_project CXX C)
+project(p4_project CXX C)
 
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_image CONFIG REQUIRED)
@@ -24,19 +24,19 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
-add_executable(prog_4 prog_4.cpp framerate.cpp ${ASSET_OUTPUT_SOURCE})
+add_executable(p4 p4.cpp framerate.cpp ${ASSET_OUTPUT_SOURCE})
 
-target_compile_options(prog_4 PRIVATE -Wall -Wpedantic)
-target_include_directories(prog_4 PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_compile_options(p4 PRIVATE -Wall -Wpedantic)
+target_include_directories(p4 PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 ### Uncomment these two lines on Linux for address sanitizer.
 ### This helps you identify the sources of segmentation faults.
 ### May not work outside Linux.
 
-#target_compile_options(prog_4 PRIVATE -g -fsanitize=address)
-#target_link_options(prog_4 PRIVATE -fsanitize=address)
+#target_compile_options(p4 PRIVATE -g -fsanitize=address)
+#target_link_options(p4 PRIVATE -fsanitize=address)
 
-target_link_libraries(prog_4 PRIVATE
+target_link_libraries(p4 PRIVATE
     SDL3::SDL3
     SDL3_image::SDL3_image
 )
