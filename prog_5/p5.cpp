@@ -1,5 +1,6 @@
 #include <SDL3/SDL.h>
-#include <SDL3_gfx/SDL3_gfxPrimitives.h>
+// #include <SDL3_gfx/SDL3_gfxPrimitives.h>
+#include <SDL3_gfxPrimitives.h>
 
 // 1916 mercedes logo
 void draw_mercedes(SDL_Renderer *rend) {
@@ -12,8 +13,8 @@ void draw_mercedes(SDL_Renderer *rend) {
     filledCircleColor(rend, 250, 250, 165, 0xFF0000FF);
 
     // 
-    float vx[6] = {250, 60, 215, 250, 285, 450};
-    float vy[6] = {325, 400, 225, 10, 225, 400};
+    Sint16 vx[6] = {250, 60, 215, 250, 285, 450};
+    Sint16 vy[6] = {325, 400, 225, 10, 225, 400};
     filledPolygonRGBA(rend, vx, vy, 6, 255, 255, 255, 255);
 
     // 
@@ -29,20 +30,20 @@ void draw_mercedes(SDL_Renderer *rend) {
     thickLineColor(rend, 450, 400, 250, 325, 5, 0xFF00D7FF);
 
     //
-    float vx2[6] = {55.8, 62.55, 46.8, 27.45, 46.8, 62.55};
-    float vy2[6] = {250.0, 232.9, 246.85, 250.0, 253.15, 268.0};
+    Sint16 vx2[6] = {55, 62, 46, 27, 46, 62};
+    Sint16 vy2[6] = {250, 232, 246, 250, 253, 268};
     filledPolygonRGBA(rend, vx2, vy2, 6, 255, 215, 0, 255);
 
-    float vx3[6] = {112.64, 129.5, 108.5, 92.6, 104.0, 104.7};
-    float vy3[6] = {112.64, 105.3, 104.0, 92.6, 108.5, 130.1};
+    Sint16 vx3[6] = {112, 129, 108, 92, 104, 104};
+    Sint16 vy3[6] = {112, 105, 104, 92, 108, 130};
     filledPolygonRGBA(rend, vx3, vy3, 6, 255, 215, 0, 255);
 
-    float vx4[6] = {444.2, 437.45, 453.2, 472.55, 453.2, 437.45};
-    float vy4[6] = {250.0, 267.1, 253.15, 250.0, 246.85, 232.0};
+    Sint16 vx4[6] = {444, 437, 453, 472, 453, 437};
+    Sint16 vy4[6] = {250, 267, 253, 250, 246, 232};
     filledPolygonRGBA(rend, vx4, vy4, 6, 255, 215, 0, 255);
 
-    float vx5[6] = {387.36, 394.7, 396.0, 402.4, 391.5, 369.9};
-    float vy5[6] = {112.64, 129.5, 108.5, 92.6, 104.0, 104.7};
+    Sint16 vx5[6] = {387, 394, 396, 402, 391, 369};
+    Sint16 vy5[6] = {112, 129, 108, 92, 104, 104};
     filledPolygonRGBA(rend, vx5, vy5, 6, 255, 215, 0, 255);
 
     // 
@@ -116,33 +117,33 @@ void draw_nasa(SDL_Renderer *rend) {
 
     // ellipse
     // top right
-    float vx1[4] = {813.6, 833.2, 820.5, 785.4};
-    float vy1[4] = {313.6, 294.1, 249.8, 214.6};
+    Sint16 vx1[4] = {813, 833, 820, 785};
+    Sint16 vy1[4] = {313, 294, 249, 214};
     bezierColor(rend, vx1, vy1, 4, 30, 0xFFFFFFFF);
 
     // top left
-    float vx2[4] = {785.4, 750.2, 705.9, 686.4};
-    float vy2[4] = {214.6, 179.5, 166.8, 186.4};
+    Sint16 vx2[4] = {785, 750, 705, 686};
+    Sint16 vy2[4] = {214, 179, 166, 186};
     bezierColor(rend, vx2, vy2, 4, 30, 0xFFFFFFFF);
 
     // bottom left
-    float vx3[4] = {686.4, 666.8, 679.5, 714.6};
-    float vy3[4] = {186.4, 205.9, 250.2, 285.4};
+    Sint16 vx3[4] = {686, 666, 679, 714};
+    Sint16 vy3[4] = {186, 205, 250, 285};
     bezierColor(rend, vx3, vy3, 4, 30, 0xFFFFFFFF);
 
     // bottom right
-    float vx4[4] = {728.6, 759.5, 794.1, 813.6};
-    float vy4[4] = {299.5, 327.9, 333.2, 313.6};
+    Sint16 vx4[4] = {728, 759, 794, 813};
+    Sint16 vy4[4] = {299, 327, 333, 313};
     bezierColor(rend, vx4, vy4, 4, 30, 0xFFFFFFFF);
 
     // First Red Curve in background
-    float vx5_base[] = {500,  625,  750,  875, 1000};
-    float vy5_base[] = {300,  100,  400,  150,   50};
+    Sint16 vx5_base[] = {500,  625,  750,  875, 1000};
+    Sint16 vy5_base[] = {300,  100,  400,  150,   50};
     int n = 5;
     int s = 500;
     for (int i = 0; i < 25; i++) {
 
-        float vx5_copy[5], vy5_copy[5];
+        Sint16 vx5_copy[5], vy5_copy[5];
         for (int j = 0; j < n; j++) {
             vx5_copy[j] = vx5_base[j];
             vy5_copy[j] = vy5_base[j];
@@ -204,12 +205,12 @@ void draw_nasa(SDL_Renderer *rend) {
     filledCircleRGBA(rend, 893, 287, 5, 255, 255, 255, 255);
     
     // Seconds Red Curve in background
-    float vx6_base[] = {500,  625,  750,  900, 1000};
-    float vy6_base[] = {475,  100,  400,  150,   50};
+    Sint16 vx6_base[] = {500,  625,  750,  900, 1000};
+    Sint16 vy6_base[] = {475,  100,  400,  150,   50};
     int s2 = 100;
     for (int i = 0; i < 25; i++) {
 
-        float vx6_copy[5], vy6_copy[5];
+        Sint16 vx6_copy[5], vy6_copy[5];
         for (int j = 0; j < n; j++) {
             vx6_copy[j] = vx6_base[j];
             vy6_copy[j] = vy6_base[j];
