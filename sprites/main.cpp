@@ -4,6 +4,7 @@
 #include "framerate.h"
 
 const char *font_file = "font_22x32.png";
+const char *ball_file = "ball.bmp";
 
 const int width = 1000;
 const int height = 300;
@@ -18,11 +19,20 @@ int main(int argc, char *argv[])
     if (SDL_Init(SDL_INIT_VIDEO))
     {
         SDL_Surface *tmp_img;
-
+        
         tmp_img = IMG_Load(font_file);
         if (!tmp_img)
         {
             SDL_Log("Could not load \"%s\"", font_file);
+            return 1;
+        }
+        
+        SDL_Surface *tmp_ball;
+        
+        tmp_ball = IMG_Load(ball_file);
+        if (!tmp_ball)
+        {
+            SDL_Log("Could not load \"%s\"", ball_file);
             return 1;
         }
 
@@ -35,6 +45,10 @@ int main(int argc, char *argv[])
             SDL_SetSurfaceColorKey(tmp_img, true, *(Uint32 *)tmp_img->pixels);
             SDL_Texture *font = SDL_CreateTextureFromSurface(rend, tmp_img);
             SDL_DestroySurface(tmp_img);
+            
+            SDL_SetSurfaceColorKey(tmp_ball, true, *(Uint32 *)tmp_ball->pixels);
+            SDL_Texture *ball = SDL_CreateTextureFromSurface(rend, tmp_ball);
+            SDL_DestroySurface(tmp_ball);
 
             const int fwidth = font->w / 16;
             const int fheight = font->h / 8;
@@ -86,6 +100,19 @@ int main(int argc, char *argv[])
 
                 SDL_RenderClear(rend);
 
+                float mx, my;
+                SDL_GetMouseState(&mx, &my);
+
+                SDL_FRect ball_dest = {
+                    .x = mx - (ball->w / 2.0f),
+                    // .y = my - (ball->h / 2.0f),
+                    .y = 50,
+                    .w = (float)ball->w,
+                    .h = (float)ball->h,
+                };
+                SDL_RenderTexture(rend, ball, nullptr, &ball_dest);
+                SDL_RenderTextureRotated(rend, ball, nullptr, &ball_dest, mx, nullptr, SDL_FLIP_NONE);
+
                 /* Draw main background string */
                 for(int i = 0; i < len; i++) {
                     SDL_FRect src_rect = {
@@ -102,7 +129,8 @@ int main(int argc, char *argv[])
                         .h = (float)fheight,
                     };
 
-                    SDL_RenderTexture(rend, font, &src_rect, &dst_rect);
+                    // SDL_RenderTexture(rend, font, &src_rect, &dst_rect);
+                    SDL_RenderTextureRotated(rend, font, &src_rect, &dst_rect, 0, nullptr, SDL_FLIP_HORIZONTAL_AND_VERTICAL);
                 }
 
                 /* Move your FONT!!!! */
