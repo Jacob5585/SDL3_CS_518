@@ -7,7 +7,7 @@
 const char *font_file = "font_22x32.png";
 // const char *font_file = "font_11x16.png";
 const char *ball_file = "ball.bmp";
-const char *background_file = "";
+const char *background_file = "beach_background.jpg";
 const char *running_man_file = "running_man.bmp";
 const char *idle_man_file = "boogie_man.bmp";
 
@@ -31,7 +31,6 @@ struct ball_state {
     float ball_y;
     float ball_vx;
     float ball_vy;
-    // float ball_angle;
     float ball_width;
     float ball_height;
 };
@@ -75,8 +74,6 @@ void lob_ball(struct ball_state &ball_state) {
     score = 0;
     ball_state.ball_vx = ((SDL_rand(100) % 10) - 5.0) * 2.0;
     ball_state.ball_vy = -15.0 - (SDL_rand(100) % 5);
-
-    SDL_Log("lob ball");
 }
 
 void hit_ball(struct ball_state &ball_state, float character_x, float character_height) {
@@ -93,7 +90,6 @@ void hit_ball(struct ball_state &ball_state, float character_x, float character_
     if (score > best_score) {
         best_score = score;
     }
-    SDL_Log("%d", score);
 }
 
 int main(int argc, char *argv[])
@@ -139,11 +135,9 @@ int main(int argc, char *argv[])
             SDL_DestroySurface(tmp_idle);
 
             // TODO: uncomment once I have a background file
-            // SDL_Surface *tmp_background = IMG_Load(background_file);
-            // SDL_Texture *background = SDL_CreateTextureFromSurface(rend, tmp_background);
-            // SDL_DestroySurface(tmp_background);
-            // 
-
+            SDL_Surface *tmp_background = IMG_Load(background_file);
+            SDL_Texture *background = SDL_CreateTextureFromSurface(rend, tmp_background);
+            SDL_DestroySurface(tmp_background);
 
             // init
             // character
@@ -167,9 +161,9 @@ int main(int argc, char *argv[])
             ball_state.ball_y = height - ball_width;
             ball_state.ball_vx = 0.0;
             ball_state.ball_vy = 0.0;
-            // ball_state.ball_angle = 0.0;
             ball_state.ball_width = ball_width;
             ball_state.ball_height = ball_height;
+            // init
 
             SDL_Event e;
 
@@ -239,6 +233,7 @@ int main(int argc, char *argv[])
                 SDL_RenderClear(rend);
 
                 // Game loop
+                SDL_RenderTexture(rend, background, nullptr, nullptr);
 
                 // ball
                 ball_state.ball_vy += 0.5f;
