@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
-project(sprites_project CXX C)
+project(p6_project CXX C)
 set(CMAKE_CXX_STANDARD 20)
 
 # ON: fetches and builds in SDL3_gfx
@@ -14,6 +14,27 @@ endif()
 find_package(SDL3 CONFIG REQUIRED)
 find_package(SDL3_image CONFIG REQUIRED)
 
+add_executable(generator generator.cpp)
+set_property(TARGET generator PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/temp")
+
+set(ASSET_OUTPUT_HEADER "${CMAKE_CURRENT_BINARY_DIR}/assets.h")
+set(ASSET_OUTPUT_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/assets.cpp")
+
+set(ASSET_FILES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/font_22x32.png"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ball.bmp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/beach_background.jpg"
+    "${CMAKE_CURRENT_SOURCE_DIR}/running_man.bmp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/boogie_man.bmp"
+)
+
+# Define the command to run the generator
+add_custom_command(
+    OUTPUT ${ASSET_OUTPUT_HEADER} ${ASSET_OUTPUT_SOURCE}
+    COMMAND $<TARGET_FILE:generator> ${ASSET_FILES}
+    DEPENDS generator ${ASSET_FILES}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+)
 
 if(USE_SDL3_GFX)
     #---------------------------
@@ -48,26 +69,28 @@ endif()
 
 
 
-add_executable(sprites main.cpp framerate.cpp)
+add_executable(p6 main.cpp framerate.cpp ${ASSET_OUTPUT_SOURCE})
+
+target_include_directories(p6 PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 if(USE_SDL3_GFX)
-    target_include_directories(sprites PRIVATE ${sdl3_gfx_SOURCE_DIR})
+    target_include_directories(p6 PRIVATE ${sdl3_gfx_SOURCE_DIR})
 endif()
 
-target_compile_options(sprites PRIVATE -Wall -Wpedantic)
+target_compile_options(p6 PRIVATE -Wall -Wpedantic)
 
 ### Uncomment these two lines on Linux for address sanitizer.
 ### This helps you identify the sources of segmentation faults.
 ### May not work outside Linux.
 
-#target_compile_options(sprites PRIVATE -g -fsanitize=address)
-#target_link_options(sprites PRIVATE -fsanitize=address)
+#target_compile_options(p6 PRIVATE -g -fsanitize=address)
+#target_link_options(p6 PRIVATE -fsanitize=address)
 
 if(USE_SDL3_GFX)
-    target_link_libraries(sprites PRIVATE SDL3_gfx_Static)
+    target_link_libraries(p6 PRIVATE SDL3_gfx_Static)
 endif()
 
-target_link_libraries(sprites PRIVATE
+target_link_libraries(p6 PRIVATE
     SDL3_image::SDL3_image
 #    SDL3_gfx_Static
     SDL3::SDL3

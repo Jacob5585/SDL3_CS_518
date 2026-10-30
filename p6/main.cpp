@@ -3,13 +3,7 @@
 #include <cmath>
 
 #include "framerate.h"
-
-const char *font_file = "font_22x32.png";
-// const char *font_file = "font_11x16.png";
-const char *ball_file = "ball.bmp";
-const char *background_file = "beach_background.jpg";
-const char *running_man_file = "running_man.bmp";
-const char *idle_man_file = "boogie_man.bmp";
+#include "assets.h"
 
 const int width = 1400;
 const int height = 800;
@@ -96,19 +90,59 @@ int main(int argc, char *argv[])
 {
     if (SDL_Init(SDL_INIT_VIDEO))
     {
-        SDL_Surface *tmp_img;
-        tmp_img = IMG_Load(font_file);
-        if (!tmp_img)
-        {
-            SDL_Log("Could not load \"%s\"", font_file);
+        SDL_IOStream *font_io = SDL_IOFromConstMem(font_22x32_png, font_22x32_png_len);
+        if (!font_io) {
+            SDL_Log("Could not create SDL_IOStream for font");
+            return 1;
+        }
+     
+        SDL_Surface *tmp_img = IMG_Load_IO(font_io, true);
+        if (!tmp_img) {
+            SDL_Log("Could not load font from memory: %s", SDL_GetError());
             return 1;
         }
         
-        SDL_Surface *tmp_ball;
-        tmp_ball = IMG_Load(ball_file);
-        if (!tmp_ball)
-        {
-            SDL_Log("Could not load \"%s\"", ball_file);
+        SDL_IOStream *ball_io = SDL_IOFromConstMem(ball_bmp, ball_bmp_len);
+        if (!ball_io) {
+            SDL_Log("Could not create SDL_IOStream for ball");
+            return 1;
+        }
+        SDL_Surface *tmp_ball = IMG_Load_IO(ball_io, true);
+        if (!tmp_ball) {
+            SDL_Log("Could not load ball from memory: %s", SDL_GetError());
+            return 1;
+        }
+
+        SDL_IOStream *running_man_io = SDL_IOFromConstMem(running_man_bmp, running_man_bmp_len);
+        if (!running_man_io) {
+            SDL_Log("Could not create SDL_IOStream for running_man");
+            return 1;
+        }
+        SDL_Surface *tmp_character = IMG_Load_IO(running_man_io, true);
+        if (!tmp_character) {
+            SDL_Log("Could not load running_man from memory: %s", SDL_GetError());
+            return 1;
+        }
+
+        SDL_IOStream *boogie_man_io = SDL_IOFromConstMem(boogie_man_bmp, boogie_man_bmp_len);
+        if (!boogie_man_io) {
+            SDL_Log("Could not create SDL_IOStream for boogie_man");
+            return 1;
+        }
+        SDL_Surface *tmp_idle = IMG_Load_IO(boogie_man_io, true);
+        if (!tmp_idle) {
+            SDL_Log("Could not load boogie_man from memory: %s", SDL_GetError());
+            return 1;
+        }
+
+        SDL_IOStream *background_io = SDL_IOFromConstMem(beach_background_jpg, beach_background_jpg_len);
+        if (!background_io) {
+            SDL_Log("Could not create SDL_IOStream for background");
+            return 1;
+        }
+        SDL_Surface *tmp_background = IMG_Load_IO(background_io, true);
+        if (!tmp_background) {
+            SDL_Log("Could not load background from memory: %s", SDL_GetError());
             return 1;
         }
 
@@ -117,7 +151,6 @@ int main(int argc, char *argv[])
 
         if (SDL_CreateWindowAndRenderer(argv[0], width, height, 0, &win, &rend))
         {
-
             SDL_SetSurfaceColorKey(tmp_img, true, *(Uint32 *)tmp_img->pixels);
             SDL_Texture *font = SDL_CreateTextureFromSurface(rend, tmp_img);
             SDL_DestroySurface(tmp_img);
@@ -126,16 +159,12 @@ int main(int argc, char *argv[])
             SDL_Texture *ball = SDL_CreateTextureFromSurface(rend, tmp_ball);
             SDL_DestroySurface(tmp_ball);
             
-            SDL_Surface *tmp_character = IMG_Load(running_man_file);
             SDL_Texture *character = SDL_CreateTextureFromSurface(rend, tmp_character);
             SDL_DestroySurface(tmp_character);
             
-            SDL_Surface *tmp_idle = IMG_Load(idle_man_file);
             SDL_Texture *idle_character = SDL_CreateTextureFromSurface(rend, tmp_idle);
             SDL_DestroySurface(tmp_idle);
 
-            // TODO: uncomment once I have a background file
-            SDL_Surface *tmp_background = IMG_Load(background_file);
             SDL_Texture *background = SDL_CreateTextureFromSurface(rend, tmp_background);
             SDL_DestroySurface(tmp_background);
 
