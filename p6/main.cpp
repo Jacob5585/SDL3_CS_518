@@ -210,22 +210,28 @@ int main(int argc, char *argv[])
                     switch (e.type)
                     {
                     case SDL_EVENT_QUIT:
-                        quit = true;
-                        break;
-                    case SDL_EVENT_KEY_DOWN:
-                    {
-                        SDL_KeyboardEvent k = e.key;
-                        if (k.key == SDLK_ESCAPE)
-                        {
+                        {                        
                             quit = true;
+                            break;
                         }
-                        
-                        if (k.key == SDLK_SPACE)
+
+                    case SDL_EVENT_KEY_DOWN:
                         {
-                            score = 0;
-                            lob_ball(ball_state);
+                            SDL_KeyboardEvent k = e.key;
+                            if (k.key == SDLK_ESCAPE)
+                            {
+                                quit = true;
+                            }
+                                
+                            if (k.key == SDLK_SPACE)
+                            {
+                                score = 0;
+                                lob_ball(ball_state);
+                            }
+
+                            break;
                         }
-                    }
+
                     case SDL_EVENT_MOUSE_BUTTON_DOWN:
                         {
                             if (e.button.button == SDL_BUTTON_LEFT) {
