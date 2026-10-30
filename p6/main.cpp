@@ -210,54 +210,54 @@ int main(int argc, char *argv[])
                     switch (e.type)
                     {
                     case SDL_EVENT_QUIT:
-                        {                        
-                            quit = true;
-                            break;
-                        }
+                    {                        
+                        quit = true;
+                        break;
+                    }
 
                     case SDL_EVENT_KEY_DOWN:
+                    {
+                        SDL_KeyboardEvent k = e.key;
+                        if (k.key == SDLK_ESCAPE)
                         {
-                            SDL_KeyboardEvent k = e.key;
-                            if (k.key == SDLK_ESCAPE)
-                            {
-                                quit = true;
-                            }
-                                
-                            if (k.key == SDLK_SPACE)
-                            {
-                                score = 0;
-                                lob_ball(ball_state);
-                            }
-
-                            break;
+                            quit = true;
                         }
+                                
+                        if (k.key == SDLK_SPACE)
+                        {
+                            score = 0;
+                            lob_ball(ball_state);
+                        }
+
+                        break;
+                    }
 
                     case SDL_EVENT_MOUSE_BUTTON_DOWN:
-                        {
-                            if (e.button.button == SDL_BUTTON_LEFT) {
-                                SDL_FRect character_rect {
-                                    .x = character_x - (character_width / 2.0),
-                                    .y = character_y,
-                                    .w = character_width,
-                                    .h = height - active_character_height,
-                                };
+                    {
+                        if (e.button.button == SDL_BUTTON_LEFT) {
+                            SDL_FRect character_rect {
+                                .x = character_x - (character_width / 2.0),
+                                .y = character_y,
+                                .w = character_width,
+                                .h = height - active_character_height,
+                            };
 
-                                SDL_FRect ball_rect {
-                                    ball_state.ball_x,
-                                    ball_state.ball_y,
-                                    ball_width,
-                                    ball_height,
-                                };
+                            SDL_FRect ball_rect {
+                                ball_state.ball_x,
+                                ball_state.ball_y,
+                                ball_width,
+                                ball_height,
+                            };
                             
-                                if (ball_rect.x < character_rect.x + character_rect.w &&
-                                    ball_rect.x + ball_rect.w > character_rect.x &&
-                                    ball_rect.y < character_rect.y + character_rect.h &&
-                                    ball_rect.y + ball_rect.h > character_rect.y)
-                                {    
-                                    hit_ball(ball_state, character_x, active_character_height);
-                                }
+                            if (ball_rect.x < character_rect.x + character_rect.w &&
+                                ball_rect.x + ball_rect.w > character_rect.x &&
+                                ball_rect.y < character_rect.y + character_rect.h &&
+                                ball_rect.y + ball_rect.h > character_rect.y)
+                            {    
+                                hit_ball(ball_state, character_x, active_character_height);
                             }
                         }
+                    }
 
                     break;
                     default:
