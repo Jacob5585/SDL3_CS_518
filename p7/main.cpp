@@ -2,6 +2,7 @@
 #include <SDL3_image/SDL_image.h>
 
 #include "framerate.h"
+#include "assets.h"
 
 const int width = 800;
 const int height = 500;
@@ -36,6 +37,7 @@ static int SDLCALL racer_thread(void *data) {
 
     // const int race_interations = 500;
     const int race_interations = SDL_rand(5000);
+    // const int race_interations = SDL_min(500, SDL_rand(1000));
     racer->speed_increment = 1.0 / (float)race_interations;
 
     for (int i = 0; i < race_interations; i++) {
@@ -51,7 +53,7 @@ static int SDLCALL racer_thread(void *data) {
         racer->eased_value = racer->easingFunc(racer->distance_moved);
         SDL_UnlockMutex(race_mutex);
         
-        if (racer->eased_value >= 1.0f) {
+        if (racer->eased_value >= 1.0) {
             
             SDL_LockMutex(race_mutex);
             if (!race_finished) {
@@ -93,14 +95,14 @@ void draw_track(SDL_Renderer *rend, int num_racers, int height) {
         }
     }
 
-    // Start Line (Left)
+    // Start Line
     SDL_SetRenderDrawColor(rend, 255, 255, 255, 255);
     SDL_FRect startLine = { 80.0, 20.0, 6.0, (float)(height - 40) };
     SDL_RenderFillRect(rend, &startLine);
 
-    // Finish Line (Right)
+    // Finish Line
     SDL_SetRenderDrawColor(rend, 220, 40, 40, 255);
-    SDL_FRect finishLine = { 720.0, 20.0, 10.0, (float)(height - 40) };
+    SDL_FRect finishLine = { 720.0, 20.0, 6.0, (float)(height - 40) };
     SDL_RenderFillRect(rend, &finishLine);
 }
 
@@ -108,7 +110,6 @@ void draw_track(SDL_Renderer *rend, int num_racers, int height) {
 float ease1(float x) {
     return x < 0.5f ? 16 * x * x * x * x * x : 1.0 - SDL_powf(-2 * x + 2, 5) / 2.0;
 }
-
 
 float ease2(float x) {
     const float n1 = 7.5625;
@@ -164,11 +165,9 @@ float easeInBounce(float x) {
     return 1 - ease2(1 - x);
 }
 
-
-
 int main(int argc, char *argv[])
 {
-    if (SDL_Init(SDL_INIT_VIDEO))
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
     {
 
         SDL_Window *win = nullptr;
@@ -186,12 +185,12 @@ int main(int argc, char *argv[])
             // init
             const int NUM_RACERS = 6;
             SDL_Color colors[NUM_RACERS] = {
-                {230, 50, 50, 255},   // Red
-                {50, 150, 255, 255},  // Blue
-                {50, 220, 50, 255},   // Green
-                {255, 165, 0, 255},   // Orange
-                {200, 50, 250, 255},  // Purple
-                {0, 220, 220, 255},   // Cyan
+                {230, 50,  50,  255},   // Red
+                {50,  150, 255, 255},   // Blue
+                {50,  220, 50,  255},   // Green
+                {255, 165, 0,   255},   // Orange
+                {200, 50,  250, 255},   // Purple
+                {0,   220, 220, 255},   // Cyan
             };
 
             float (*easingList[NUM_RACERS])(float) = { ease1, ease2, easeOutElastic, easeInElastic, easeInQuart, easeInBounce };
@@ -218,6 +217,68 @@ int main(int argc, char *argv[])
                 };
             }
             // init
+
+            // audio
+            SDL_AudioSpec start_race_spec;
+            Uint8 *start_race_buf = nullptr;
+            Uint32 start_race_len = 0;
+            
+            SDL_AudioSpec race_loop_spec;
+            Uint8 *race_loop_buf = nullptr;
+            Uint32 race_loop_len = 0;
+            
+            SDL_AudioSpec finish_race_spec;
+            Uint8 *finish_race_buf = nullptr;
+            Uint32 finish_race_len = 0;
+            
+            // SDL_LoadWAV("splash.wav", &start_race_spec, &start_race_buf, &start_race_len);
+            SDL_LoadWAV_IO(
+                SDL_IOFromMem((void *)race_start_wav, race_start_wav_len),
+                true,
+                &start_race_spec,
+                &start_race_buf,
+                &start_race_len
+            );
+
+            SDL_AudioStream *start_race_as = SDL_OpenAudioDeviceStream(
+                SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
+                &start_race_spec,
+                nullptr,
+                nullptr
+            );
+
+            // SDL_LoadWAV("loop_piano.wav", &race_loop_spec, &race_loop_buf, &race_loop_len);
+            SDL_LoadWAV_IO(
+                SDL_IOFromMem((void *)race_loop_wav, race_loop_wav_len),
+                true,
+                &race_loop_spec,
+                &race_loop_buf,
+                &race_loop_len
+            );
+
+            SDL_AudioStream *race_loop_as = SDL_OpenAudioDeviceStream(
+                SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
+                &race_loop_spec,
+                nullptr,
+                nullptr
+            );
+
+            // SDL_LoadWAV("splash.wav", &finish_race_spec, &finish_race_buf, &finish_race_len);
+            SDL_LoadWAV_IO(
+                SDL_IOFromMem((void *)race_finish_wav, race_finish_wav_len),
+                true,
+                &finish_race_spec,
+                &finish_race_buf,
+                &finish_race_len
+            );
+
+            SDL_AudioStream *finish_race_as = SDL_OpenAudioDeviceStream(
+                SDL_AUDIO_DEVICE_DEFAULT_PLAYBACK,
+                &finish_race_spec,
+                nullptr,
+                nullptr
+            );
+            // audio
             
             // threading
             race_mutex = SDL_CreateMutex();
@@ -230,6 +291,14 @@ int main(int argc, char *argv[])
             race_start = true;
             SDL_UnlockMutex(race_mutex);
             // threading
+            
+            SDL_ClearAudioStream(start_race_as);
+            SDL_PutAudioStreamData(start_race_as, start_race_buf, start_race_len);
+            SDL_ResumeAudioStreamDevice(start_race_as);
+
+            SDL_ClearAudioStream(race_loop_as);
+            SDL_PutAudioStreamData(race_loop_as, race_loop_buf, race_loop_len);
+            SDL_ResumeAudioStreamDevice(race_loop_as);
 
             while (!quit)
             {
@@ -252,6 +321,10 @@ int main(int argc, char *argv[])
                     default:
                         break;
                     }
+                }
+
+                if(SDL_GetAudioStreamAvailable(race_loop_as) == 0) {
+                    SDL_PutAudioStreamData(race_loop_as, race_loop_buf, race_loop_len);
                 }
 
                 SDL_SetRenderDrawColor(rend, 0xdd, 0xbb, 0xff, SDL_ALPHA_OPAQUE);
@@ -296,25 +369,24 @@ int main(int argc, char *argv[])
 
                     draw_car(rend, currentX, yPos - 12, width, height, final_color);
 
-                    // 4. Banner background behind the trophy (centered around x = 400)
+                    // Banner background behind the trophy
                     SDL_SetRenderDrawBlendMode(rend, SDL_BLENDMODE_BLEND);
-                    SDL_FRect bannerRect = { 340.0f, 40.0f, 120.0f, 50.0f };
+                    SDL_FRect bannerRect = { 340.0, 40.0, 120.0, 50.0 };
                     SDL_SetRenderDrawColor(rend, 15, 15, 15, 180); // Dark semi-transparent box
                     SDL_RenderFillRect(rend, &bannerRect);
-                    
                     SDL_SetRenderDrawColor(rend, 255, 215, 0, 220); // Gold border
                     SDL_RenderRect(rend, &bannerRect);
 
-                    // 5. Pulsing gold trophy icon inside the banner
-                    Uint8 trophy_alpha = (Uint8)(200 + 55 * SDL_sinf((float)SDL_GetTicks() * 0.01f));
-                    SDL_SetRenderDrawColor(rend, 255, 215, 0, trophy_alpha);
-
-                    SDL_FRect trophyCup   = { 390.0f, 48.0f, 20.0f, 20.0f };
+                    SDL_FRect trophyCup   = { 390.0, 48.0, 20.0, 20.0 };
                     SDL_RenderFillRect(rend, &trophyCup);
-                    SDL_FRect trophyBase  = { 394.0f, 68.0f, 12.0f, 5.0f };
+                    SDL_FRect trophyBase  = { 394.0, 68.0, 12.0, 5.0 };
                     SDL_RenderFillRect(rend, &trophyBase);
-                    SDL_FRect trophyStand = { 384.0f, 73.0f, 32.0f, 4.0f };
+                    SDL_FRect trophyStand = { 384.0, 73.0, 32.0, 4.0 };
                     SDL_RenderFillRect(rend, &trophyStand);
+
+                    SDL_ClearAudioStream(finish_race_as);
+                    SDL_PutAudioStreamData(finish_race_as, finish_race_buf, finish_race_len);
+                    SDL_ResumeAudioStreamDevice(finish_race_as);
                 }
                 // Race
 
@@ -329,6 +401,12 @@ int main(int argc, char *argv[])
                 SDL_WaitThread(threads[i], nullptr);
             }
             SDL_DestroyMutex(race_mutex);
+            SDL_free(race_loop_buf);
+            SDL_DestroyAudioStream(race_loop_as);
+            SDL_free(start_race_buf);
+            SDL_DestroyAudioStream(start_race_as);
+            SDL_free(finish_race_buf);
+            SDL_DestroyAudioStream(finish_race_as);
             SDL_DestroyRenderer(rend);
             SDL_DestroyWindow(win);
         }
