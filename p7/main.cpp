@@ -323,7 +323,7 @@ int main(int argc, char *argv[])
                     }
                 }
 
-                if(SDL_GetAudioStreamAvailable(race_loop_as) == 0) {
+                if(SDL_GetAudioStreamAvailable(race_loop_as) == 0 && winner_id == -1) {
                     SDL_PutAudioStreamData(race_loop_as, race_loop_buf, race_loop_len);
                 }
 
@@ -339,9 +339,6 @@ int main(int argc, char *argv[])
                 for (int i = 0; i < NUM_RACERS; i++) {
                 
                     SDL_LockMutex(race_mutex);
-                    // SDL_Log("%d: %f", racers[i].id, racers[i].eased_value);
-
-
                     float currentX = startX + (float)(racers[i].eased_value * totalTrackDistance) - racers[i].width;
                     currentX = SDL_max(startX - racers[i].width, SDL_min(currentX, finishX - racers[i].width));
 
@@ -371,22 +368,26 @@ int main(int argc, char *argv[])
 
                     // Banner background behind the trophy
                     SDL_SetRenderDrawBlendMode(rend, SDL_BLENDMODE_BLEND);
-                    SDL_FRect bannerRect = { 340.0, 40.0, 120.0, 50.0 };
+                    SDL_FRect bannerRect = {340.0, 40.0, 120.0, 50.0};
                     SDL_SetRenderDrawColor(rend, 15, 15, 15, 180); // Dark semi-transparent box
                     SDL_RenderFillRect(rend, &bannerRect);
                     SDL_SetRenderDrawColor(rend, 255, 215, 0, 220); // Gold border
                     SDL_RenderRect(rend, &bannerRect);
 
-                    SDL_FRect trophyCup   = { 390.0, 48.0, 20.0, 20.0 };
+                    SDL_FRect trophyCup   = {390.0, 48.0, 20.0, 20.0};
                     SDL_RenderFillRect(rend, &trophyCup);
-                    SDL_FRect trophyBase  = { 394.0, 68.0, 12.0, 5.0 };
+                    SDL_FRect trophyBase  = {394.0, 68.0, 12.0, 5.0};
                     SDL_RenderFillRect(rend, &trophyBase);
-                    SDL_FRect trophyStand = { 384.0, 73.0, 32.0, 4.0 };
+                    SDL_FRect trophyStand = {384.0, 73.0, 32.0, 4.0};
                     SDL_RenderFillRect(rend, &trophyStand);
 
-                    SDL_ClearAudioStream(finish_race_as);
-                    SDL_PutAudioStreamData(finish_race_as, finish_race_buf, finish_race_len);
-                    SDL_ResumeAudioStreamDevice(finish_race_as);
+                    SDL_PauseAudioStreamDevice(race_loop_as);
+                    SDL_ClearAudioStream(race_loop_as);
+                    if (((SDL_GetTicks() / 100) % 2) == 0) {
+                        SDL_ClearAudioStream(finish_race_as);
+                        SDL_PutAudioStreamData(finish_race_as, finish_race_buf, finish_race_len);
+                        SDL_ResumeAudioStreamDevice(finish_race_as);
+                    }
                 }
                 // Race
 
@@ -394,9 +395,7 @@ int main(int argc, char *argv[])
 
                 fr.delay();
             }
-
-            // SDL_WaitThread(thread, nullptr);
-            
+           
             for (int i = 0; i < NUM_RACERS; i++) {
                 SDL_WaitThread(threads[i], nullptr);
             }
